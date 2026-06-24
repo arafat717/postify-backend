@@ -3,9 +3,8 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import config from "./config";
 import { prisma } from "./lib/prisma";
-import httpsStatus from "http-status-codes";
-import bycript from "bcrypt";
-import { userRoute } from "./modules/user.route";
+import { userRoute } from "./modules/user/user.route";
+import { authRoute } from "./modules/auth/auth.route";
 
 const app = express();
 
@@ -20,11 +19,10 @@ app.use(
 );
 
 app.get("/", async (req: Request, res: Response) => {
-  const user = await prisma.user.findMany();
-  console.log("users==>", user);
   res.send("Hello World!");
 });
 
 app.use("/users", userRoute);
+app.use("/auth", authRoute);
 
 export default app;

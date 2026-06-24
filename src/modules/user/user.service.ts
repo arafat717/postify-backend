@@ -1,7 +1,7 @@
-import { prisma } from "../lib/prisma";
-import httpsStatus from "http-status-codes";
+
 import bycript from "bcrypt";
 import { TUser } from "./user.interface";
+import { prisma } from "../../lib/prisma";
 
 const createUserIntoDb = async (payload: TUser) => {
   const { email, name, password, profilePhoto } = payload;
