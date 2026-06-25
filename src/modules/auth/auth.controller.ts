@@ -34,16 +34,17 @@ const loginUser = async (req: Request, res: Response) => {
 };
 
 const getMyProfile = catchAsync(async (req: Request, res: Response) => {
-  
-  const {accessToken} = req.cookies;
+  // const {accessToken} = req.cookies;
 
-  const verifiedToken = jwtUtils.verifyToken(accessToken,config.jwt_access_secret)
+  // const verifiedToken = jwtUtils.verifyToken(accessToken,config.jwt_access_secret)
 
-  if(typeof verifiedToken === "string" ){
-    throw new Error(verifiedToken)
-  }
+  // if(typeof verifiedToken === "string" ){
+  //   throw new Error(verifiedToken)
+  // }
 
-  const result = await authService.getMyProfileIntoDb(verifiedToken.id)
+  const user = req.user;
+
+  const result = await authService.getMyProfileIntoDb(user?.id as string);
 
   sentResponse(res, {
     success: true,
@@ -55,5 +56,5 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 
 export const authController = {
   loginUser,
-  getMyProfile
+  getMyProfile,
 };
