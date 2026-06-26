@@ -1,8 +1,7 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Router } from "express";
 import { authController } from "./auth.controller";
-import { jwtUtils } from "../../utils/jwt";
-import config from "../../config";
 import { Role } from "../../../generated/prisma/enums";
+import { auth } from "../../utils/auth";
 
 const router = Router();
 
@@ -19,44 +18,21 @@ declare global {
   }
 }
 
+// check token
+// verify token
+//
+
 router.post("/login", authController.loginUser);
 router.get(
   "/me",
-  (req: Request, res: Response, next: NextFunction) => {
-    const { accessToken } = req.cookies;
-
-    const verifiedToken = jwtUtils.verifyToken(
-      accessToken,
-      config.jwt_access_secret,
-    );
-
-    if (typeof verifiedToken === "string") {
-      throw new Error(verifiedToken);
-    }
-
-    const { email, name, role, id } = verifiedToken;
-
-    const reqireRoles = [Role.ADMIN, Role.USER, Role.AUTHOR];
-
-    if (!reqireRoles.includes(role)) {
-      return res.status(403).json({
-        success: false,
-        statusCode: 403,
-        message:
-          "Frobidden. You don't have permission to access this resource.",
-      });
-    }
-
-    req.user = {
-      id,
-      name,
-      email,
-      role,
-    };
-
-    next();
-  },
+  auth(Role.ADMIN, Role.USER, Role.AUTHOR),
   authController.getMyProfile,
+);
+
+router.put(
+  "/my-profile",
+  auth(Role.ADMIN, Role.USER, Role.AUTHOR),
+  authController.updateProfile,
 );
 
 export const authRoute = router;
