@@ -35,4 +35,6 @@ router.put(
   authController.updateProfile,
 );
 
+router.get("/refresh-token", authController.refreshAccessToken);
+
 export const authRoute = router;

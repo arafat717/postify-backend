@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import bycript from "bcrypt";
 import { TLogin } from "./auth.interface";
-import { SignOptions } from "jsonwebtoken";
+import { JwtPayload, SignOptions } from "jsonwebtoken";
 import config from "../../config";
 import { jwtUtils } from "../../utils/jwt";
 
@@ -76,8 +76,51 @@ const updateProfileIntoDb = async (userId: string, data: any) => {
   return updatedUser;
 };
 
+const refreshTokenIntoDb = async (token: string) => {
+
+
+  const verifyedToken = jwtUtils.verifyToken(token, config.jwt_refresh_secret);
+
+  if (!verifyedToken.success) {
+    throw new Error(verifyedToken.error);
+  }
+
+  const { id } = verifyedToken.data as JwtPayload;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found. Please login again.");
+  }
+
+  if (user.activeStatus === "BLOCKED") {
+    throw new Error("Your account has been blocked. Please contact support.");
+  }
+
+  const payload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    payload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
+
+
+  return {accessToken};
+};
+
 export const authService = {
   loginUserIntoDb,
   getMyProfileIntoDb,
   updateProfileIntoDb,
+  refreshTokenIntoDb,
 };

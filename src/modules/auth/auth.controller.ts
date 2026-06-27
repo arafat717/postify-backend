@@ -56,8 +56,28 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const refreshAccessToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+  const {accessToken} = await authService.refreshTokenIntoDb(refreshToken);
+
+    res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "none",
+    secure: false,
+    maxAge: 1000 * 60 * 60 * 24,
+  });
+
+  sentResponse(res, {
+    success: true,
+    statusCode: httpsStatus.CREATED,
+    message: "Rrefresh token genarated successfully!",
+    data: accessToken,
+  });
+});
+
 export const authController = {
   loginUser,
   getMyProfile,
   updateProfile,
+  refreshAccessToken,
 };
