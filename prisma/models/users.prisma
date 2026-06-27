@@ -9,6 +9,8 @@ model User {
  profile Profile?
  role Role @default(USER)
 
+posts Post[]
+comments Comment[]
  @@map("users")
 }
 
