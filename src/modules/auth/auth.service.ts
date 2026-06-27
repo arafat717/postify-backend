@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import bycript from "bcrypt";
 import { TLogin } from "./auth.interface";
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import { SignOptions } from "jsonwebtoken";
 import config from "../../config";
 import { jwtUtils } from "../../utils/jwt";
 
@@ -52,7 +52,32 @@ const getMyProfileIntoDb = async (userId: string) => {
   return user;
 };
 
+const updateProfileIntoDb = async (userId: string, data: any) => {
+  const { name, email, bio, profilePhoto } = data;
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name,
+      email,
+      profile: {
+        update: {
+          profilePhoto,
+          bio,
+        },
+      },
+    },
+    omit: {
+      password: true,
+    },
+    include: {
+      profile: true,
+    },
+  });
+  return updatedUser;
+};
+
 export const authService = {
   loginUserIntoDb,
   getMyProfileIntoDb,
+  updateProfileIntoDb,
 };

@@ -3,8 +3,6 @@ import { authService } from "./auth.service";
 import { sentResponse } from "../../utils/sentResponse";
 import httpsStatus from "http-status-codes";
 import { catchAsync } from "../../utils/catchAsync";
-import { jwtUtils } from "../../utils/jwt";
-import config from "../../config";
 
 const loginUser = async (req: Request, res: Response) => {
   const payload = req.body;
@@ -34,18 +32,8 @@ const loginUser = async (req: Request, res: Response) => {
 };
 
 const getMyProfile = catchAsync(async (req: Request, res: Response) => {
-  const { accessToken } = req.cookies;
-
-  const verifiedToken = jwtUtils.verifyToken(
-    accessToken,
-    config.jwt_access_secret,
-  );
-
-  if (typeof verifiedToken === "string") {
-    throw new Error(verifiedToken);
-  }
-
-  const result = await authService.getMyProfileIntoDb(verifiedToken.id);
+  const user = req.user;
+  const result = await authService.getMyProfileIntoDb(user?.id as string);
 
   sentResponse(res, {
     success: true,
@@ -54,7 +42,22 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const data = req.body;
+  const userId = req.user?.id;
+  const result = await authService.updateProfileIntoDb(userId as string, data);
+
+  sentResponse(res, {
+    success: true,
+    statusCode: httpsStatus.CREATED,
+    message: "User updated successfully!",
+    data: result,
+  });
+});
+
 export const authController = {
   loginUser,
-  getMyProfile
+  getMyProfile,
+  updateProfile,
 };
