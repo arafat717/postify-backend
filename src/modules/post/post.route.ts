@@ -7,14 +7,18 @@ const router = Router();
 
 router.get("/", postController.getAllPost);
 router.get("/stats", postController.getStats);
-router.get("/my-posts", postController.getMyposts);
+router.get(
+  "/my-posts",
+  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
+  postController.getMyposts,
+);
 router.get("/:postId", postController.getSinglePost);
 router.post(
   "/",
   auth(Role.ADMIN, Role.AUTHOR, Role.USER),
   postController.createPost,
 );
-router.patch("/:postId", postController.updatePost);
-router.delete("/:postId", postController.deletePost);
+router.patch("/:postId",auth(Role.ADMIN,Role.USER,Role.AUTHOR), postController.updatePost);
+router.delete("/:postId",auth(Role.ADMIN,Role.USER, Role.AUTHOR), postController.deletePost);
 
 export const postRoute = router;

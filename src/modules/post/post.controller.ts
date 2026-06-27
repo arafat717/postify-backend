@@ -25,15 +25,21 @@ const getAllPost = catchAsync(async (req: Request, res: Response) => {
     message: "Posts retrived successfully!",
     data: user,
   });
-}); 
+});
 
 const getSinglePost = catchAsync(async (req: Request, res: Response) => {
-  const user = await postService.getSinglePostAndIncremetViewCountFromDb();
+  const id = req.params.postId;
+  if (!id) {
+    throw new Error("Params id is missing!");
+  }
+  const user = await postService.getSinglePostAndIncremetViewCountFromDb(
+    id as string,
+  );
 
   sentResponse(res, {
     success: true,
     statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
+    message: "Post retrived successfully!",
     data: user,
   });
 });
@@ -49,34 +55,60 @@ const getStats = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updatePost = catchAsync(async (req: Request, res: Response) => {
-  const user = await postService.updatePostIntoDb();
+  const userId = req.user?.id;
+  const isAdmin = req.user?.role === "ADMIN";
+  const payload = req.body;
+  const postId = req.params.postId;
+
+  if (!postId) {
+    throw new Error("Please provide postid!");
+  }
+
+  const user = await postService.updatePostIntoDb(
+    postId as string,
+    payload,
+    userId as string,
+    isAdmin,
+  );
 
   sentResponse(res, {
     success: true,
     statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
+    message: "Post updated successfully!",
     data: user,
   });
 });
 
 const deletePost = catchAsync(async (req: Request, res: Response) => {
-  const user = await postService.deletePostFromDb();
+  const userId = req.user?.id;
+  const isAdmin = req.user?.role === "ADMIN";
+  const postId = req.params.postId;
+
+  if (!postId) {
+    throw new Error("Please provide postid!");
+  }
+  const user = await postService.deletePostFromDb(
+    postId as string,
+    userId as string,
+    isAdmin,
+  );
 
   sentResponse(res, {
     success: true,
     statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
-    data: user,
+    message: "Post deleted successfully!",
+    data: null,
   });
 });
 
 const getMyposts = catchAsync(async (req: Request, res: Response) => {
-  const user = await postService.getMyPostsFromDb();
+  const id = req.user?.id;
+  const user = await postService.getMyPostsFromDb(id as string);
 
   sentResponse(res, {
     success: true,
     statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
+    message: "My posts retrived successfully!",
     data: user,
   });
 });
