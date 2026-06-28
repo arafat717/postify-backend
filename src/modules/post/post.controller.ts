@@ -49,7 +49,7 @@ const getStats = catchAsync(async (req: Request, res: Response) => {
   sentResponse(res, {
     success: true,
     statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
+    message: "Posts stats retrived successfully!",
     data: user,
   });
 });
