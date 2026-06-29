@@ -14,16 +14,23 @@ const changeCommentStatus = catchAsync(async (req: Request, res: Response) => {
     data: user,
   });
 });
+
 const createComment = catchAsync(async (req: Request, res: Response) => {
-  const user = await commentService.createCommentIntoDb();
+  const authorId = req.user?.id;
+  const payload = req.body;
+  const user = await commentService.createCommentIntoDb(
+    authorId as string,
+    payload,
+  );
 
   sentResponse(res, {
     success: true,
     statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
+    message: "Comment created successfully!",
     data: user,
   });
 });
+
 const deleteComment = catchAsync(async (req: Request, res: Response) => {
   const user = await commentService.deleteUsersCommentFromDb();
 

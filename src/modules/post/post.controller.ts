@@ -17,6 +17,8 @@ const createPost = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+
 const getAllPost = catchAsync(async (req: Request, res: Response) => {
   const user = await postService.getAllPostFromDb();
   sentResponse(res, {
@@ -26,6 +28,7 @@ const getAllPost = catchAsync(async (req: Request, res: Response) => {
     data: user,
   });
 });
+
 
 const getSinglePost = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.postId;
@@ -43,6 +46,8 @@ const getSinglePost = catchAsync(async (req: Request, res: Response) => {
     data: user,
   });
 });
+
+
 const getStats = catchAsync(async (req: Request, res: Response) => {
   const user = await postService.getAllStatsFromDb();
 
@@ -53,6 +58,7 @@ const getStats = catchAsync(async (req: Request, res: Response) => {
     data: user,
   });
 });
+
 
 const updatePost = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;
@@ -79,6 +85,7 @@ const updatePost = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 const deletePost = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const isAdmin = req.user?.role === "ADMIN";
@@ -101,6 +108,8 @@ const deletePost = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+
 const getMyposts = catchAsync(async (req: Request, res: Response) => {
   const id = req.user?.id;
   const user = await postService.getMyPostsFromDb(id as string);
@@ -112,6 +121,7 @@ const getMyposts = catchAsync(async (req: Request, res: Response) => {
     data: user,
   });
 });
+
 
 export const postController = {
   createPost,
