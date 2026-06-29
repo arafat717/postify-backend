@@ -1,39 +1,36 @@
 import { Router } from "express";
+import { Role } from "../../../generated/prisma/enums";
 import { commentController } from "./comment.controller";
 import { auth } from "../../utils/auth";
-import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
-router.get(
-  "/author/:authorId",
-  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
-  commentController.getUserComment,
-);
-router.get(
-  "/:commentId",
-  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
-  commentController.getSingleCommentWithPost,
-);
 router.post(
   "/",
-  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
+  auth(Role.USER, Role.ADMIN, Role.AUTHOR),
   commentController.createComment,
 );
+
+router.get("/author/:authorId", commentController.getCommentByAuthorId);
+
+router.get("/:postId", commentController.getCommentByPostId);
+
 router.patch(
   "/:commentId",
-  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
+  auth(Role.USER, Role.ADMIN, Role.AUTHOR),
   commentController.updateComment,
 );
+
 router.delete(
   "/:commentId",
-  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
+  auth(Role.USER, Role.ADMIN, Role.AUTHOR),
   commentController.deleteComment,
 );
-router.patch(
-  "/:commentId/modarate",
-  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
-  commentController.changeCommentStatus,
+
+router.put(
+  "/:commentId/moderate",
+  auth(Role.ADMIN),
+  commentController.moderateComment,
 );
 
-export const commentRoute = router;
+export const commentRoutes = router;

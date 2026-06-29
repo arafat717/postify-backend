@@ -1,84 +1,110 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status-codes";
 import { catchAsync } from "../../utils/catchAsync";
-import { sentResponse } from "../../utils/sentResponse";
-import httpsStatus from "http-status-codes";
 import { commentService } from "./comment.service";
+import { sentResponse } from "../../utils/sentResponse";
 
-const changeCommentStatus = catchAsync(async (req: Request, res: Response) => {
-  const user = await commentService.changeCommentStatusIntoDb();
-
-  sentResponse(res, {
-    success: true,
-    statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
-    data: user,
-  });
-});
-
-const createComment = catchAsync(async (req: Request, res: Response) => {
-  const authorId = req.user?.id;
-  const payload = req.body;
-  const user = await commentService.createCommentIntoDb(
-    authorId as string,
-    payload,
-  );
-
-  sentResponse(res, {
-    success: true,
-    statusCode: httpsStatus.CREATED,
-    message: "Comment created successfully!",
-    data: user,
-  });
-});
-
-const deleteComment = catchAsync(async (req: Request, res: Response) => {
-  const user = await commentService.deleteUsersCommentFromDb();
-
-  sentResponse(res, {
-    success: true,
-    statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
-    data: user,
-  });
-});
-const getUserComment = catchAsync(async (req: Request, res: Response) => {
-  const user = await commentService.getCommentFromSpecificUserFromDb();
-
-  sentResponse(res, {
-    success: true,
-    statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
-    data: user,
-  });
-});
-const getSingleCommentWithPost = catchAsync(
-  async (req: Request, res: Response) => {
-    const user = await commentService.getSingleCommentWithSpecificPostFromDb();
-
+const createComment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const authorId = req.user?.id as string;
+    const result = await commentService.createComment(authorId, req.body);
     sentResponse(res, {
       success: true,
-      statusCode: httpsStatus.CREATED,
-      message: "User register successfully!",
-      data: user,
+      statusCode: httpStatus.CREATED,
+      message: "Comment created successfully",
+      data: result,
     });
   },
 );
-const updateComment = catchAsync(async (req: Request, res: Response) => {
-  const user = await commentService.updateUserCommentIntoDb();
 
-  sentResponse(res, {
-    success: true,
-    statusCode: httpsStatus.CREATED,
-    message: "User register successfully!",
-    data: user,
-  });
-});
+const getCommentByAuthorId = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { authorId } = req.params;
+    const result = await commentService.getCommentByAuthorId(
+      authorId as string,
+    );
+    sentResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Comments retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+const getCommentByPostId = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { postId } = req.params;
+    const result = await commentService.getCommentByCommentId(postId as string);
+    sentResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Comment retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+const updateComment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const { commentId } = req.params;
+    const authorId = user?.id as string;
+    const payload = req.body;
+    const result = await commentService.updateComment(
+      commentId as string,
+      payload,
+      authorId,
+    );
+    sentResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Comment updated successfully",
+      data: result,
+    });
+  },
+);
+
+const deleteComment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const { commentId } = req.params;
+    const authorId = user?.id as string;
+    const result = await commentService.deleteComment(
+      commentId as string,
+      authorId,
+    );
+    sentResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Comment deleted successfully",
+      data: result,
+    });
+  },
+);
+
+const moderateComment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { commentId } = req.params;
+    const payload = req.body;
+    const result = await commentService.moderateComment(
+      commentId as string,
+      payload,
+    );
+    sentResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Comment moderated successfully",
+      data: result,
+    });
+  },
+);
 
 export const commentController = {
-  changeCommentStatus,
-  updateComment,
-  getSingleCommentWithPost,
-  getUserComment,
-  deleteComment,
   createComment,
+  getCommentByAuthorId,
+  getCommentByPostId,
+  updateComment,
+  deleteComment,
+  moderateComment,
 };
