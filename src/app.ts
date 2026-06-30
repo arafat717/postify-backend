@@ -6,7 +6,7 @@ import { prisma } from "./lib/prisma";
 import { userRoute } from "./modules/user/user.route";
 import { authRoute } from "./modules/auth/auth.route";
 import { postRoute } from "./modules/post/post.route";
-import { commentRoute } from "./modules/comment/comment.route";
+import { commentRoutes } from "./modules/comment/comment.route";
 
 const app = express();
 
@@ -27,6 +27,6 @@ app.get("/", async (req: Request, res: Response) => {
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/posts", postRoute);
-app.use("/api/comments", commentRoute);
+app.use("/api/comments", commentRoutes);
 
 export default app;
