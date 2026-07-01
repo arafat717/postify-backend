@@ -2,6 +2,7 @@ import { error } from "node:console";
 import { prisma } from "../../lib/prisma";
 import { IPostPayload, IPostQuery, IUpdatePost } from "./post.interface";
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
+import { PostWhereInput } from "../../../generated/prisma/models";
 
 const getAllPostFromDb = async (query: IPostQuery) => {
   const limit = query.limit ? Number(query.limit) : 10;
@@ -11,39 +12,110 @@ const getAllPostFromDb = async (query: IPostQuery) => {
   const sortBy = query.sortBy ? query.sortBy : "createdAt";
   const sortOrderBy = query.sortOrder ? query.sortOrder : "desc";
 
-  const allPosts = await prisma.post.findMany({
-    where: {
-      AND: [
-        query.searchTerm
-          ? {
-              OR: [
-                {
-                  title: {
-                    contains: query.searchTerm,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  content: {
-                    contains: query.searchTerm,
-                    mode: "insensitive",
-                  },
-                },
-              ],
-            }
-          : {},
-        query.title
-          ? {
-              title: query.title,
-            }
-          : {},
+  const tags = query.tags ? JSON.parse(query.tags as string) : null;
 
-        query.content
-          ? {
-              content: query.content,
-            }
-          : {},
+  const tagsArray = Array.isArray(tags) ? tags : [];
+
+  const andConditions: PostWhereInput[] = [];
+
+  if (query.searchTerm) {
+    andConditions.push({
+      OR: [
+        {
+          title: {
+            contains: query.searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          content: {
+            contains: query.searchTerm,
+            mode: "insensitive",
+          },
+        },
       ],
+    });
+  }
+
+  if (query.title) {
+    andConditions.push({
+      title: query.title,
+    });
+  }
+
+  if (query.content) {
+    andConditions.push({
+      content: query.content,
+    });
+  }
+
+  if (query.authorId) {
+    andConditions.push({
+      authorId: query.authorId,
+    });
+  }
+
+  if (query.isFeatured) {
+    andConditions.push({
+      isFeatured: Boolean(query.isFeatured),
+    });
+  }
+
+  if (query.tags) {
+    andConditions.push({
+      tags: {
+        hasSome: tagsArray,
+      },
+    });
+  }
+
+  if (query.status) {
+    andConditions.push({
+      status: query.status,
+    });
+  }
+
+  // andConditions.push({
+  //   isPremium: false,
+  // });
+
+  const allPosts = await prisma.post.findMany({
+    // where: {
+    //   AND: [
+    //     query.searchTerm
+    //       ? {
+    //           OR: [
+    //             {
+    //               title: {
+    //                 contains: query.searchTerm,
+    //                 mode: "insensitive",
+    //               },
+    //             },
+    //             {
+    //               content: {
+    //                 contains: query.searchTerm,
+    //                 mode: "insensitive",
+    //               },
+    //             },
+    //           ],
+    //         }
+    //       : {},
+    //     query.title
+    //       ? {
+    //           title: query.title,
+    //         }
+    //       : {},
+
+    //     query.content
+    //       ? {
+    //           content: query.content,
+    //         }
+    //       : {},
+    //   ],
+    // },
+
+    where: {
+      AND: andConditions,
     },
 
     take: limit,
